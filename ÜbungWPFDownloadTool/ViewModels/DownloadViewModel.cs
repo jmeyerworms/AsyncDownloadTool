@@ -52,10 +52,8 @@ namespace ÜbungWPFDownloadTool.ViewModels
 
         private void DownloadServiceOnDownloadProgressChanged(object sender, MyDownloadEventArgs myDownloadEventArgs)
         {
-            Download.CurrentFileSize = myDownloadEventArgs.CurrentFileSize;
-            Download.TotalFileSize = myDownloadEventArgs.TotalFileSize;
-
-            DownloadTracker.SetProgress(Download.CurrentFileSize, Download.TotalFileSize);
+            
+            DownloadTracker.SetProgress(Download.GetBytesFromAllParts(), Download.TotalFileSize);
 
             DownloadSpeed = DownloadTracker.GetBytesPerSecond();
             DownloadSpeedAsString = DownloadTracker.GetBytesPerSecondString();
@@ -69,6 +67,8 @@ namespace ÜbungWPFDownloadTool.ViewModels
             CurrentProgress = 1.0;
             Download.State = CurrentDownloadState.Finish;
             Debug.WriteLine("Download finisch");
+            Download.FileRenameCancelToken = null;
+            Download.FileRenameStreamer = null;
 
             DownloadComplete?.Invoke(sender, myDownloadEventArgs);
         }
@@ -87,9 +87,15 @@ namespace ÜbungWPFDownloadTool.ViewModels
 
         public double GetBytesPerSecondAsUnit() => DownloadTracker.GetBytesPerSecondAsUnit();
 
+        public void DownloadFile()
+        {
+            Download.State = CurrentDownloadState.Download;
+            _downloadService.DownloadFile(Download);
+        }
+
         public void CancelDownload()
         {
-            _downloadService.CancelDownload();
+            _downloadService.CancelDownload(Download);
 
             Download.State = CurrentDownloadState.Cancel;
         }
@@ -107,7 +113,7 @@ namespace ÜbungWPFDownloadTool.ViewModels
 
             try
             {
-                _downloadService.CancelDownload();                
+                _downloadService.CancelDownload(Download);                
             }
             catch (Exception e)
             {
@@ -130,7 +136,6 @@ namespace ÜbungWPFDownloadTool.ViewModels
             }
             
         }
-
-        public void DownloadFile() => _downloadService.DownloadFile(Download);
+ 
     }
 }

@@ -7,7 +7,7 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
     {
         Engine Engine { get; }
 
-        void CancelDownload();
+        void CancelDownload(Model.Download download);
         void DownloadFile(Model.Download download);
 
         void OnDownloadProgressChanged(MyProgress value);

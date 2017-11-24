@@ -76,9 +76,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ÜbungWPFDownloadTool\ÜbungWPFDownloadTool.csproj">
+    <ProjectReference Include="..\ÜbungWPFDownloadTool\WPFDownloadTool.csproj">
       <Project>{016b09eb-d058-4a73-a6c8-ed861927315b}</Project>
-      <Name>ÜbungWPFDownloadTool</Name>
+      <Name>WPFDownloadTool</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

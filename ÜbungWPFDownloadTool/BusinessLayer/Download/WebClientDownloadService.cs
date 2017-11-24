@@ -15,7 +15,7 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
 
         public Engine Engine => Engine.WebClient;
 
-        public void CancelDownload()
+        public void CancelDownload(Model.Download download)
         {
             if (_webClient.IsBusy)
                 _webClient.CancelAsync();

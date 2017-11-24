@@ -33,7 +33,7 @@ namespace ÜbungWPFDownloadTool.ViewModels
 
         public ObservableCollection<DownloadViewModel> Downloads { get; } = new ObservableCollection<DownloadViewModel>();
 
-        public string Url { get; set; }
+        public string Url { get; set; } = @"http://ipv4.download.thinkbroadband.com/100MB.zip";
 
         public bool AreAddFilesPossible => _urlService.IsUrlValid(Url);
 
@@ -62,11 +62,9 @@ namespace ÜbungWPFDownloadTool.ViewModels
                 _show.Message(Ressources.DownloaderViewModel.ErrorCreateDownload);
                 return;
             }
-
             var neu = new DownloadViewModel(download,_createEngine.For(SelectedEngine));            
             AreDownloadListShow = true;
             AreDownloadStartpossible = true;
-
             Downloads.Add(neu);                   
         }
 
@@ -83,8 +81,7 @@ namespace ÜbungWPFDownloadTool.ViewModels
             foreach (var downloadInList in Downloads)
             {
                 if (downloadInList.Download != null && downloadInList.Download.State != CurrentDownloadState.Finish)
-                {
-                    downloadInList.Download.State = CurrentDownloadState.Download;
+                {                    
                     downloadInList.DownloadFile();
                     downloadInList.DownloadComplete += DownloadComplete;
                     downloadInList.DownloadProgressChanged += DownloadProgressChanged;
