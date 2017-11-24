@@ -1,0 +1,33 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ÜbungWPF"                        
+        xmlns:viewmodel="clr-namespace:ÜbungWPF.Viewmodel"                        
+        xmlns:model="clr-namespace:ÜbungWPF.Model"                        
+        x:Class="ÜbungWPF.MainWindow"    
+        mc:Ignorable="d"
+        Title="Kundenverwaltung" Height="350" Width="525">
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="258*"/>
+            <ColumnDefinition Width="259*"/>
+        </Grid.ColumnDefinitions>
+
+        <ListView x:Name="ListViewKunden" ItemsSource="{Binding Path = KundenListe,Mode=TwoWay }">
+        </ListView>
+
+
+        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+            <Label Content="Vorname"/>
+            <TextBox x:Name="TextBoxVorname" Text=""  />
+            <Label Content="Nachname"/>
+            <TextBox x:Name="TextBoxNachname" Text=""/>
+            <Button x:Name="ButtonSave" Click="ButtonSave_Click" Content="Save"/>
+        </StackPanel>
+
+
+    </Grid>
+</Window>

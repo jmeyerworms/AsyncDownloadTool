@@ -1,0 +1,111 @@
+﻿<UserControl
+    x:Class="ÜbungWPFDownloadTool.Views.DownloaderView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://www.caliburnproject.org"
+    xmlns:converters="clr-namespace:ÜbungWPFDownloadTool.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dServer="clr-namespace:ÜbungWPFDownloadTool.BusinessLayer.Download"
+    xmlns:local="clr-namespace:ÜbungWPFDownloadTool"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:model="clr-namespace:ÜbungWPFDownloadTool.Model"
+    xmlns:viewModels="clr-namespace:ÜbungWPFDownloadTool.ViewModels"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:BoolToCollapsedConverter x:Key="BoolToCollapsedConverter" />
+    </UserControl.Resources>
+
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <Label FontWeight="DemiBold">
+                    Download Tool
+                </Label>
+
+            </StackPanel>
+
+            <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
+                <Label>URL:</Label>
+                <TextBox MinWidth="300" Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" />
+
+                <Button cal:Message.Attach="[Event Click] = [Action AddDownload]" IsEnabled="{Binding AreAddFilesPossible}">Add File</Button>
+                <Button cal:Message.Attach="[Event Click] = [Action StartDownload]" IsEnabled="{Binding AreDownloadStartpossible}">Download</Button>
+            </StackPanel>
+        </StackPanel>
+
+        <ListView
+            Grid.Row="1"
+            HorizontalContentAlignment="Stretch"
+            ItemsSource="{Binding Downloads}"
+            Visibility="{Binding AreDownloadListShow, Converter={StaticResource BoolToCollapsedConverter}}">
+
+            <ListView.ItemTemplate>
+                <DataTemplate DataType="viewModels:DownloadViewModel">
+                    <ContentControl cal:View.Model="{Binding .}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <StackPanel Grid.Row="2" Visibility="{Binding AreDownloadDetailsShown, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel>
+
+                <TextBlock TextAlignment="Center">
+                    <Run Text="{Binding ToTalFilesToDownload}" />
+                    <Run Text="File/s Download/ing at" /> <Run Text="{Binding TotalDownloadSpeed}" />
+                </TextBlock>
+                <ProgressBar
+                    Height="20"
+                    Maximum="1"
+                    Minimum="0"
+                    Value="{Binding TotalDownloadProgress}">
+                    <ProgressBar.Foreground>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Color="#FF009B8C" />
+                            <GradientStop Offset="1" Color="#FF23FFD7" />
+                        </LinearGradientBrush>
+                    </ProgressBar.Foreground>
+                </ProgressBar>
+                <Button cal:Message.Attach="[Event Click] = [Action CancelDownloads]">cancel</Button>
+            </StackPanel>
+
+        </StackPanel>
+
+        <Expander Grid.Row="3" Header="Option">
+            <StackPanel Orientation="Horizontal">
+                <ComboBox
+                    DisplayMemberPath="DisplayName"
+                    ItemsSource="{converters:EnumToItemsSource {x:Type dServer:Engine}}"
+                    SelectedValue="{Binding SelectedEngine}"
+                    SelectedValuePath="Value"
+                    ToolTip="Download Engine" />
+
+            </StackPanel>
+        </Expander>
+
+    </Grid>
+</UserControl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
