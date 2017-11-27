@@ -92,7 +92,8 @@ namespace ÜbungWPFDownloadTool.BusinessLayer
             int decimals = 3 - intLen;
             if (decimals < 0)
                 decimals = 0;
-            return speed;
+
+            return Math.Round(speed,MidpointRounding.AwayFromZero);
         }
 
         public double GetBytesPerSecond()

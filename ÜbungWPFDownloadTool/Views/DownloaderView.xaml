@@ -75,7 +75,7 @@
                         </LinearGradientBrush>
                     </ProgressBar.Foreground>
                 </ProgressBar>
-                <Button cal:Message.Attach="[Event Click] = [Action CancelDownloads]">cancel</Button>
+                <Button Margin="20" cal:Message.Attach="[Event Click] = [Action CancelDownloads]">cancel</Button>
             </StackPanel>
 
         </StackPanel>

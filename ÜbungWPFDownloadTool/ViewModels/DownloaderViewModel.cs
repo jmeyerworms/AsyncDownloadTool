@@ -85,6 +85,8 @@ namespace ÜbungWPFDownloadTool.ViewModels
                     downloadInList.DownloadFile();
                     downloadInList.DownloadComplete += DownloadComplete;
                     downloadInList.DownloadProgressChanged += DownloadProgressChanged;
+                    downloadInList.DownloadCancel += (sender, args) => _show.Message(Ressources.DownloaderViewModel.CancelDownload);
+                    downloadInList.DownloadPause += (sender, args) => _show.Message(Ressources.DownloaderViewModel.PauseDownload);
                 }
             }
 

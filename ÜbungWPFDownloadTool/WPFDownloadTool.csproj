@@ -90,16 +90,20 @@
     <Compile Include="BusinessLayer\DownloadProgressTracker.cs" />
     <Compile Include="BusinessLayer\Download\CreateEngine.cs" />
     <Compile Include="BusinessLayer\Download\Engine.cs" />
+    <Compile Include="BusinessLayer\Download\FileRenameCancelToken.cs" />
     <Compile Include="BusinessLayer\Download\FileRenameStreamer.cs" />
+    <Compile Include="BusinessLayer\Download\FileResumeStreamer.cs" />
     <Compile Include="BusinessLayer\Download\HttpWebDownloadService.cs" />
     <Compile Include="BusinessLayer\Download\ICreateEngine.cs" />
     <Compile Include="BusinessLayer\Download\MyDownloadEventArgs.cs" />
+    <Compile Include="BusinessLayer\Download\NewFileRenameStreamer.cs" />
     <Compile Include="BusinessLayer\Download\WebClientDownloadService.cs" />
     <Compile Include="BusinessLayer\Url\IUrlService.cs" />
     <Compile Include="Converters\BoolToCollapsedConverter.cs" />
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Converters\EnumToItemsSource.cs" />
     <Compile Include="Model\Download.cs" />
+    <Compile Include="Model\DownloadParts.cs" />
     <Compile Include="Ressources\DownloaderViewModel1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

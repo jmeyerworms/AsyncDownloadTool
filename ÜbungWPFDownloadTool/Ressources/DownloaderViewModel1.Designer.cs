@@ -61,11 +61,29 @@ namespace ÜbungWPFDownloadTool.Ressources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Download Canceled.
+        /// </summary>
+        internal static string CancelDownload {
+            get {
+                return ResourceManager.GetString("CancelDownload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error while create download.
         /// </summary>
         internal static string ErrorCreateDownload {
             get {
                 return ResourceManager.GetString("ErrorCreateDownload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Download Pause.
+        /// </summary>
+        internal static string PauseDownload {
+            get {
+                return ResourceManager.GetString("PauseDownload", resourceCulture);
             }
         }
         

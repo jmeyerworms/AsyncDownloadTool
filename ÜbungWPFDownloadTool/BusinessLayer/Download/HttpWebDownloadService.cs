@@ -10,13 +10,12 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
 {
     public class HttpWebDownloadService : IDownloadService
     {
-        private CancellationToken _cancellationToken;
         private CancellationTokenSource _cancellationTokenSource;        
-        private IProgress<MyProgress> _onProgressChanged;
         
         public event EventHandler<MyDownloadEventArgs> DownloadComplete;
         public event EventHandler<MyDownloadEventArgs> DownloadProgressChanged;
-        public event EventHandler<MyDownloadEventArgs> DownloadCancel;        
+        public event EventHandler<MyDownloadEventArgs> DownloadCancel;
+        public event EventHandler<MyDownloadEventArgs> DownloadPause;
 
         public Engine Engine => Engine.HttpWeb;
         
@@ -26,87 +25,75 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
             _cancellationTokenSource.Cancel();
         }
 
-        private void StartnewDownload(Model.Download download)
-        {            
-            download.FileRenameStreamer = new FileRenameStreamer(download.TargetPathWithFileName, download.FileRenameCancelToken);            
+        public async void ResumeDownload(Model.Download download)
+        {
+            download.FileRenameCancelToken = new FileRenameCancelToken();
+            var fileResume = new FileResumeStreamer(download.TempFileName,download.TargetPathWithFileName, download.FileRenameCancelToken);            
+
+            await RunDownload(
+                download, 
+                request =>request.AddRange(download.GetBytesFromAllParts()),
+                fileResume);
         }
-        
+
+        public void PauseDownload(Model.Download download)
+        {
+            download.FileRenameCancelToken.Cancel();
+            _cancellationTokenSource.Cancel();
+        }
+
 
         public async void DownloadFile(Model.Download download)
         {
+            download.FileRenameCancelToken = new FileRenameCancelToken();
+            var fileRenameStreamer = new NewFileRenameStreamer(download.TargetPathWithFileName, download.FileRenameCancelToken);
+            download.TempFileName = fileRenameStreamer.GetNewTempFileWithPath();
+
+            await RunDownload(
+                download,
+                request => request.AddRange(0),
+                fileRenameStreamer);
+        }
+
+        private async Task RunDownload(Model.Download download, Action<HttpWebRequest> configureRequest,FileRenameStreamer fileRenameStreamer)
+        {
             try
-            {
-                download.FileRenameCancelToken = new FileRenameCancelToken();
+            {                
                 _cancellationTokenSource = new CancellationTokenSource();
-                _cancellationToken = _cancellationTokenSource.Token;
 
-                HttpWebRequest request = (HttpWebRequest) WebRequest.Create(new Uri(download.SourcePath));
-                if (download.FileRenameStreamer != null && download.FileRenameCancelToken != null && download.FileRenameCancelToken.IsCanceld)
-                {                 
-                    request.AddRange(download.GetBytesFromAllParts());                    
-                }
-                else
-                {
-                    StartnewDownload(download);
-                }
+                var request = (HttpWebRequest) WebRequest.Create(new Uri(download.SourcePath));
 
-                _onProgressChanged = new Progress<MyProgress>(OnDownloadProgressChanged);
+                configureRequest(request);
                 
-                var OldPercentDone = 0;
-
-
-                //using (var response = (HttpWebResponse)await request.GetResponseAsync())
-                using (var response = (HttpWebResponse) await request.GetResponseAsync())
+                using (var response = await request.GetResponseAsync())
                 {
-                    download.FileRenameStreamer.SetContentLength(response.ContentLength);
+                    fileRenameStreamer.SetContentLength(response.ContentLength);
+                    
                     var data = response.GetResponseStream();
 
-                    using (download.FileRenameStreamer)
+                    using (fileRenameStreamer)
                     {
-                        var byteBuffer = download.FileRenameStreamer.GetByteBuffer();
-                        download.FileRenameStreamer.SetStreamPosition(download.GetBytesFromAllParts());
+                        var byteBuffer = fileRenameStreamer.GetByteBuffer();
+                        fileRenameStreamer.SetStreamPosition(download.GetBytesFromAllParts());
+                        download.TotalFileSize = fileRenameStreamer.GetTotalFileSize();
 
-                        using (var output = download.FileRenameStreamer.GetFileStream())
-                        {
-                            var bytesRead = 0;
-                            download.StartDownloadPart();
-
-                            do
-                            {
-                                try
-                                {
-                                    bytesRead = await data.ReadAsync(byteBuffer, 0, byteBuffer.Length,
-                                        _cancellationToken);
-                                }
-                                catch (Exception)
-                                {
-                                    DownloadCancel?.Invoke(this, new MyDownloadEventArgs());
-                                    return;
-                                }
-
-                                download.AddBytesToPart(bytesRead);
-                                download.FileRenameStreamer.AddCurrentBytesRead(bytesRead);
-                                
-                                if (bytesRead <= 0)
-                                    continue;
-                                await output.WriteAsync(byteBuffer, 0, bytesRead, _cancellationToken);
-
-                                SendDownloadProgress(download, OldPercentDone);
-
-                            } while (bytesRead > 0);
-
-                            download.FinishDownloadPart();
-                            download.GetLogFromAllParts();
-
-                            DownloadComplete?.Invoke(this, new MyDownloadEventArgs());
-                        }
-
+                        await MakeDownload(download, data, byteBuffer, _cancellationTokenSource.Token, fileRenameStreamer);
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch (IOException)
             {
                 DownloadCancel?.Invoke(this, new MyDownloadEventArgs());
+            }
+            catch (OperationCanceledException)
+            {
+                if (download.State == CurrentDownloadState.Cancel)
+                    DeleteDownload(download);
+                else if (download.State == CurrentDownloadState.Pause)
+                    DownloadPause?.Invoke(this, new MyDownloadEventArgs());
+                else
+                    DeleteDownload(download);
+
             }
             catch (WebException)
             {
@@ -114,21 +101,63 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
             }
         }
 
-        private void SendDownloadProgress(Model.Download download,double oldPercentDone)
+        private void CompleteDownload(Model.Download download)
+        {
+            DownloadComplete?.Invoke(this, new MyDownloadEventArgs());
+            download.FileRenameCancelToken = null;                        
+        }
+        private void DeleteDownload(Model.Download download)
+        {
+            DownloadCancel?.Invoke(this, new MyDownloadEventArgs());
+        }
+
+        private async Task MakeDownload(Model.Download download, Stream data, byte[] byteBuffer, CancellationToken cancellationToken, FileRenameStreamer fileRenameStreamer)
+        {            
+            using (var output = fileRenameStreamer.GetFileStream())
+            {
+                var onProgressChanged = new Progress<MyProgress>(OnDownloadProgressChanged);
+                var oldPercentDone = 0.0;
+                var bytesRead = 0;
+                
+                download.StartDownloadPart();
+                do
+                {                   
+                    bytesRead = await data.ReadAsync(byteBuffer, 0, byteBuffer.Length, cancellationToken);
+
+                    download.AddBytesToPart(bytesRead);
+                    fileRenameStreamer.AddCurrentBytesRead(bytesRead);
+
+                    if (bytesRead <= 0)
+                        continue;
+
+                    await output.WriteAsync(byteBuffer, 0, bytesRead, cancellationToken);
+                    
+                    oldPercentDone = SendDownloadProgress(onProgressChanged, download, oldPercentDone);
+                } while (bytesRead > 0);
+
+                download.FinishDownloadPart();
+                download.DumpLogFromAllParts();
+
+                CompleteDownload(download);
+            }
+        }
+
+        private static double SendDownloadProgress(IProgress<MyProgress> onProgressChanged, Model.Download download, double oldPercentDone)
         {            
             var myProgress = new MyProgress()
             {
-                CurrentFileSize = download.FileRenameStreamer.GetCurrentBytesRead(),
-                TotalFileSize = download.FileRenameStreamer.GetTotalFileSize()
+                CurrentFileSize =  download.GetBytesFromAllParts(),
+                TotalFileSize = download.TotalFileSize
             };            
-            download.TotalFileSize = download.FileRenameStreamer.GetTotalFileSize();
 
             var percentDone = (double)myProgress.CurrentFileSize / myProgress.TotalFileSize;
 
-            if (!(percentDone - oldPercentDone > 0.05)) return;
+            if (!(percentDone - oldPercentDone > 0.05))
+                return oldPercentDone;
 
-            oldPercentDone = percentDone;
-            _onProgressChanged?.Report(myProgress);
+            onProgressChanged?.Report(myProgress);
+
+            return percentDone;
         }
 
         public void OnDownloadProgressChanged(MyProgress value)

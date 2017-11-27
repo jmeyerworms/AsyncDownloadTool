@@ -12,6 +12,7 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
         public event EventHandler<MyDownloadEventArgs> DownloadComplete;
         public event EventHandler<MyDownloadEventArgs> DownloadProgressChanged;
         public event EventHandler<MyDownloadEventArgs> DownloadCancel;
+        public event EventHandler<MyDownloadEventArgs> DownloadPause;
 
         public Engine Engine => Engine.WebClient;
 
@@ -29,23 +30,25 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
                 {
                     _webClient.DownloadFileCompleted += WebClientOnDownloadFileCompleted;
                     _webClient.DownloadProgressChanged += WebClientOnDownloadProgressChanged;
-                    await _webClient.DownloadFileTaskAsync(new Uri(download.SourcePath), download.TargetPath);
+                    await _webClient.DownloadFileTaskAsync(new Uri(download.SourcePath),
+                        download.TargetPathWithFileName);
                 }
             }
             catch (Exception e)
             {
-                DownloadCancel?.Invoke(this,new MyDownloadEventArgs());                
+                DownloadCancel?.Invoke(this, new MyDownloadEventArgs());
             }
         }
 
-        public void PauseDownload()
+        public void ResumeDownload(Model.Download download)
         {
-            throw new NotImplementedException();
+            DownloadFile(download);
         }
 
-        public void ResumeDownload()
+        public void PauseDownload(Model.Download download)
         {
-            throw new NotImplementedException();
+            if (_webClient.IsBusy)
+                _webClient.CancelAsync();
         }
 
         private void WebClientOnDownloadProgressChanged(object sender, DownloadProgressChangedEventArgs downloadProgressChangedEventArgs)

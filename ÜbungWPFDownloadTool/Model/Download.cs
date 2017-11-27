@@ -11,30 +11,20 @@ using ÜbungWPFDownloadTool.ViewModels;
 
 namespace ÜbungWPFDownloadTool.Model
 {
-    public class DownloadParts
-    {
-        public long Offset { get; set; }
-        public long Bytes { get; set; }
-        public bool Finished { get; set; }
-    }
-
     public class Download : DownloadParts
     {
         private Download()
         {
         }
+
         public long TotalFileSize { get; set; }
         private readonly List<DownloadParts> _downloadParts = new List<DownloadParts>();
-
         public string TargetPathWithFileName { get; set; }
         public string TargetFileName { get; set; }
-
+        public string TempFileName { get; set; }
         public string TargetPath { get; private set; }
         public string SourcePath { get; private set; }
-
-        public FileRenameStreamer FileRenameStreamer { get; set; }
         public FileRenameCancelToken FileRenameCancelToken { get; set; }
-
 
         public CurrentDownloadState State { get; set; }
 
@@ -85,11 +75,11 @@ namespace ÜbungWPFDownloadTool.Model
             return _downloadParts.Sum(x => x.Bytes);
         }
 
-        public void GetLogFromAllParts()
+        public void DumpLogFromAllParts()
         {
             foreach (var part in _downloadParts)
             {
-                Debug.WriteLine("part offset " + part.Offset + "bytes " + part.Bytes + "finished " + part.Finished);
+                Debug.WriteLine("part offset " + part.Offset + "bytes " + part.Bytes + " finished " + part.Finished);
             }
         }
     }
