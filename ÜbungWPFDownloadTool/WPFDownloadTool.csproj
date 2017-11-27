@@ -100,6 +100,7 @@
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Converters\EnumToItemsSource.cs" />
     <Compile Include="Model\Download.cs" />
+    <Compile Include="Model\DownloadParts.cs" />
     <Compile Include="Ressources\DownloaderViewModel1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

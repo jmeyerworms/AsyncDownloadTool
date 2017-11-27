@@ -117,8 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CancelDownload" xml:space="preserve">
+    <value>Download Canceled</value>
+  </data>
   <data name="ErrorCreateDownload" xml:space="preserve">
     <value>Error while create download</value>
+  </data>
+  <data name="PauseDownload" xml:space="preserve">
+    <value>Download Pause</value>
   </data>
   <data name="WrongURL" xml:space="preserve">
     <value>Wrong URL Format (https://www.google.de/yourdownloadfile)</value>

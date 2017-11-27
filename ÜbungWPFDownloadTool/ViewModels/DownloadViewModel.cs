@@ -34,6 +34,7 @@ namespace ÜbungWPFDownloadTool.ViewModels
         public event EventHandler<MyDownloadEventArgs> DownloadComplete;
         public event EventHandler<MyDownloadEventArgs> DownloadProgressChanged;
         public event EventHandler<MyDownloadEventArgs> DownloadCancel;
+        public event EventHandler<MyDownloadEventArgs> DownloadPause;
 
         public DownloadViewModel(Download download,IDownloadService downloadService)
         {
@@ -44,16 +45,21 @@ namespace ÜbungWPFDownloadTool.ViewModels
             this.DownloadName = download.TargetFileName;
             this._downloadService = downloadService;
             DownloadTracker = new DownloadProgressTracker(50, TimeSpan.FromMilliseconds(500));
-
-            _downloadService.DownloadComplete += DownloadServiceOnDownloadComplete;
+            
             _downloadService.DownloadProgressChanged += DownloadServiceOnDownloadProgressChanged;
+            _downloadService.DownloadComplete += DownloadServiceOnDownloadComplete;
             _downloadService.DownloadCancel += DownloadServiceOnDownloadCancel;
+            _downloadService.DownloadPause += DownloadServiceOnDownloadPause;
+        }
+
+        private void DownloadServiceOnDownloadPause(object sender, MyDownloadEventArgs myDownloadEventArgs)
+        {
+            DownloadPause?.Invoke(sender, myDownloadEventArgs);
         }
 
         private void DownloadServiceOnDownloadProgressChanged(object sender, MyDownloadEventArgs myDownloadEventArgs)
-        {
-            
-            DownloadTracker.SetProgress(Download.GetBytesFromAllParts(), Download.TotalFileSize);
+        {            
+            DownloadTracker.SetProgress(myDownloadEventArgs.CurrentFileSize, myDownloadEventArgs.TotalFileSize);
 
             DownloadSpeed = DownloadTracker.GetBytesPerSecond();
             DownloadSpeedAsString = DownloadTracker.GetBytesPerSecondString();
@@ -77,9 +83,6 @@ namespace ÜbungWPFDownloadTool.ViewModels
         {
             DownloadTracker.NewFile();
             Download.State = CurrentDownloadState.Cancel;
-            //CurrentProgress = 0;
-            //Download.CurrentFileSize = 0;
-            //Download.TotalFileSize = 0;
             Debug.WriteLine("Download cancel");
 
             DownloadCancel?.Invoke(sender, myDownloadEventArgs);
@@ -96,12 +99,11 @@ namespace ÜbungWPFDownloadTool.ViewModels
         public void CancelDownload()
         {
             _downloadService.CancelDownload(Download);
-
             Download.State = CurrentDownloadState.Cancel;
         }
 
         public void PauseDownload()
-        {
+        {            
             if (Download.State == CurrentDownloadState.Pause)
             {
                 ResumeDownload();
@@ -111,14 +113,7 @@ namespace ÜbungWPFDownloadTool.ViewModels
             PauseIcon = FontAwesomeIcon.Play;
             Download.State = CurrentDownloadState.Pause;
 
-            try
-            {
-                _downloadService.CancelDownload(Download);                
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }            
+            _downloadService.PauseDownload(Download);                         
         }
 
         private void ResumeDownload()
@@ -126,15 +121,7 @@ namespace ÜbungWPFDownloadTool.ViewModels
             PauseIcon = FontAwesomeIcon.Pause;
             Download.State = CurrentDownloadState.Download;
 
-            try
-            {
-                _downloadService.DownloadFile(Download);                
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            
+            _downloadService.ResumeDownload(Download);                            
         }
  
     }
