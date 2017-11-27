@@ -1,4 +1,4 @@
-﻿namespace ÜbungWPFDownloadTool.BusinessLayer.Show
+﻿namespace WPFDownloadTool.BusinessLayer.Show
 {
     public interface IShow
     {

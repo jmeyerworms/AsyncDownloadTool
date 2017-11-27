@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace ÜbungWPFDownloadTool.Views
+namespace WPFDownloadTool.Views
 {
     public partial class DownloaderView : UserControl
     {

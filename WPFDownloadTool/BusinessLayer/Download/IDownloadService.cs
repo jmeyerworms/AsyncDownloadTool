@@ -1,7 +1,7 @@
 ﻿using System;
-using ÜbungWPFDownloadTool.ViewModels;
+using WPFDownloadTool.Model;
 
-namespace ÜbungWPFDownloadTool.BusinessLayer.Download
+namespace WPFDownloadTool.BusinessLayer.Download
 {
     public interface IDownloadService
     {

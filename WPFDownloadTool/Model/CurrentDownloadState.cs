@@ -1,4 +1,4 @@
-﻿namespace ÜbungWPFDownloadTool.Model
+﻿namespace WPFDownloadTool.Model
 {
     public enum CurrentDownloadState
     {

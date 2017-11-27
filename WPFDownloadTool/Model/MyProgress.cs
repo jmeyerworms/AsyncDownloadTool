@@ -1,4 +1,4 @@
-﻿namespace ÜbungWPFDownloadTool.ViewModels
+﻿namespace WPFDownloadTool.Model
 {
     
         public class MyProgress

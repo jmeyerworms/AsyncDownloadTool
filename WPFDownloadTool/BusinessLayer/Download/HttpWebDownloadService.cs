@@ -3,10 +3,9 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using ÜbungWPFDownloadTool.Model;
-using ÜbungWPFDownloadTool.ViewModels;
+using WPFDownloadTool.Model;
 
-namespace ÜbungWPFDownloadTool.BusinessLayer.Download
+namespace WPFDownloadTool.BusinessLayer.Download
 {
     public class HttpWebDownloadService : IDownloadService
     {
