@@ -53,12 +53,10 @@ namespace WPFDownloadTool.BusinessLayer.Download
         }
 
 
+        protected abstract string GetInternalNewTempFileWithPath();
         public string GetNewTempFileWithPath()
         {
-            if (TempFileNameWithPath == null)
-            TempFileNameWithPath = Path.GetTempFileName();
-            
-            return TempFileNameWithPath;
+            return GetInternalNewTempFileWithPath();            
         }
 
         private string GetOriginalFileWithPath()
