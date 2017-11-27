@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFDownloadTool", "ÜbungWPFDownloadTool\WPFDownloadTool.csproj", "{016B09EB-D058-4A73-A6C8-ED861927315B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFDownloadTool", "WPFDownloadTool\WPFDownloadTool.csproj", "{016B09EB-D058-4A73-A6C8-ED861927315B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFTest", "WPFTest\WPFTest.csproj", "{E4BA0C1B-41DE-4358-A8CA-BA198F74A9D2}"
 EndProject
