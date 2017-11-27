@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ÜbungWPFDownloadTool.Ressources {
+namespace WPFDownloadTool.Ressources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ÜbungWPFDownloadTool.Ressources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ÜbungWPFDownloadTool.Ressources.DownloaderViewModel", typeof(DownloaderViewModel).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WPFDownloadTool.Ressources.DownloaderViewModel", typeof(DownloaderViewModel).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
