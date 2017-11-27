@@ -1,7 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
-namespace ÜbungWPFDownloadTool.BusinessLayer.Download
+namespace WPFDownloadTool.BusinessLayer.Download
 {
     public class FileResumeStreamer : FileRenameStreamer
     {

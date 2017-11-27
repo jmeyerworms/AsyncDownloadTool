@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Net;
-using ÜbungWPFDownloadTool.ViewModels;
+using WPFDownloadTool.Model;
 
-namespace ÜbungWPFDownloadTool.BusinessLayer.Download
+namespace WPFDownloadTool.BusinessLayer.Download
 {
     public class WebClientDownloadService : IDownloadService
     {                

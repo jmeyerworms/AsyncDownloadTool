@@ -1,23 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Ink;
 using Caliburn.Micro;
-using Microsoft.Win32;
-using ÜbungWPFDownloadTool.BusinessLayer;
-using ÜbungWPFDownloadTool.BusinessLayer.Download;
-using ÜbungWPFDownloadTool.Model;
 using FontAwesome.WPF;
+using WPFDownloadTool.BusinessLayer;
+using WPFDownloadTool.BusinessLayer.Download;
+using WPFDownloadTool.Model;
 
-namespace ÜbungWPFDownloadTool.ViewModels
+namespace WPFDownloadTool.ViewModels
 {
     public class DownloadViewModel : Screen
     {

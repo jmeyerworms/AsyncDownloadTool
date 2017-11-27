@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 
-namespace ÜbungWPFDownloadTool.BusinessLayer.Url
+namespace WPFDownloadTool.BusinessLayer.Url
 {
     public class UrlService : IUrlService
     {

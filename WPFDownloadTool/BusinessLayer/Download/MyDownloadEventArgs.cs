@@ -1,4 +1,4 @@
-namespace ÜbungWPFDownloadTool.BusinessLayer.Download
+namespace WPFDownloadTool.BusinessLayer.Download
 {
     public class MyDownloadEventArgs
     {

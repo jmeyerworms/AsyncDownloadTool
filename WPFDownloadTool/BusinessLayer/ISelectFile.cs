@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
-
-namespace ÜbungWPFDownloadTool.BusinessLayer
+namespace WPFDownloadTool.BusinessLayer
 {
     public interface ISelectFile
     {

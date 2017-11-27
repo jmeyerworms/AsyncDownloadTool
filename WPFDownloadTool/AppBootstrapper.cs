@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using Caliburn.Micro;
 using Autofac;
-using Autofac.Core;
-using ÜbungWPFDownloadTool.BusinessLayer;
-using ÜbungWPFDownloadTool.BusinessLayer.Download;
-using ÜbungWPFDownloadTool.BusinessLayer.Show;
-using ÜbungWPFDownloadTool.BusinessLayer.Url;
-using ÜbungWPFDownloadTool.Model;
-using ÜbungWPFDownloadTool.ViewModels;
+using Caliburn.Micro;
+using WPFDownloadTool.BusinessLayer;
+using WPFDownloadTool.BusinessLayer.Download;
+using WPFDownloadTool.BusinessLayer.Show;
+using WPFDownloadTool.BusinessLayer.Url;
+using WPFDownloadTool.Model;
+using WPFDownloadTool.ViewModels;
 
-namespace ÜbungWPFDownloadTool
+namespace WPFDownloadTool
 {
     class AppBootstrapper : BootstrapperBase
     {

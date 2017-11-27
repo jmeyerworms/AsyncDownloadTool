@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace ÜbungWPFDownloadTool.BusinessLayer.Show
+namespace WPFDownloadTool.BusinessLayer.Show
 {
     public class Show : IShow
     {

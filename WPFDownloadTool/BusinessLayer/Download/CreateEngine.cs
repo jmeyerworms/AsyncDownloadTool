@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ÜbungWPFDownloadTool.BusinessLayer.Download
+namespace WPFDownloadTool.BusinessLayer.Download
 {
     public class CreateEngine : ICreateEngine
     {

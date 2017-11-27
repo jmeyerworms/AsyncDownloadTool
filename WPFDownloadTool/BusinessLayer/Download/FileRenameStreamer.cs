@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace ÜbungWPFDownloadTool.BusinessLayer.Download
+namespace WPFDownloadTool.BusinessLayer.Download
 {
     public abstract class FileRenameStreamer : IDisposable
     {

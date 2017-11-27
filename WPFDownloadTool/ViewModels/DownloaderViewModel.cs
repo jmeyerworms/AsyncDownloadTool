@@ -2,13 +2,13 @@
 using System.IO;
 using System.Linq;
 using Caliburn.Micro;
-using ÜbungWPFDownloadTool.BusinessLayer;
-using ÜbungWPFDownloadTool.BusinessLayer.Download;
-using ÜbungWPFDownloadTool.BusinessLayer.Show;
-using ÜbungWPFDownloadTool.BusinessLayer.Url;
-using ÜbungWPFDownloadTool.Model;
+using WPFDownloadTool.BusinessLayer;
+using WPFDownloadTool.BusinessLayer.Download;
+using WPFDownloadTool.BusinessLayer.Show;
+using WPFDownloadTool.BusinessLayer.Url;
+using WPFDownloadTool.Model;
 
-namespace ÜbungWPFDownloadTool.ViewModels
+namespace WPFDownloadTool.ViewModels
 {
     public class DownloaderViewModel : Screen
     {

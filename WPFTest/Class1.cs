@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
-using NUnit.Framework.Internal;
-using NUnit.Framework;
-using ÜbungWPFDownloadTool;
-using ÜbungWPFDownloadTool.Model;
-using ÜbungWPFDownloadTool.ViewModels;
-using Moq;
-using ÜbungWPFDownloadTool.BusinessLayer;
+﻿using NUnit.Framework;
 
 namespace WPFTest
 {
