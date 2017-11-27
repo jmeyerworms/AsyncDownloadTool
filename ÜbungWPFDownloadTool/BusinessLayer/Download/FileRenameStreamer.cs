@@ -4,53 +4,41 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ÜbungWPFDownloadTool.BusinessLayer.Download
 {
-    public class FileRenameCancelToken
+    public abstract class FileRenameStreamer : IDisposable
     {
-        public bool IsCanceld { get; private set; }
-        public void Cancel()
-        {
-            IsCanceld = true;
-        }
-    }
+        protected string TempFileNameWithPath;
+        protected readonly string _targetPathWithFileName;
+        protected long FileStreamOffset = 0;
+        protected int BufferSize = 64 * 1024;
+        protected readonly FileRenameCancelToken _cancelToken;
 
-    public class FileRenameStreamer : IDisposable
-    {                
-        const int BufferSize = 64 * 1024;
-        private FileStream _fileStream;
-        private string _tempFileNameWithPath;
-        private readonly string _targetPathWithFileName;
-        private readonly FileRenameCancelToken _cancelToken;
-        private readonly byte[] _byteBuffer;
-        private long _fileStreamOffset = 0;
+
+        private FileStream _fileStream;                
+        private readonly byte[] _byteBuffer;        
         private long _contentLenght;
         private long _currentBytesRead;
 
-        public FileRenameStreamer(string targetPathWithFileName, FileRenameCancelToken cancelToken = null)
+        public FileRenameStreamer(string targetPathWithFileName, FileRenameCancelToken cancelToken)
         {
             _targetPathWithFileName = targetPathWithFileName;
-            _cancelToken = cancelToken;
+            _cancelToken = cancelToken ?? new FileRenameCancelToken();
             _byteBuffer = new byte[BufferSize];
         }
 
+        protected abstract FileStream GetInternalFileStream();
         public FileStream GetFileStream()
         {
-            // tempfile existiert
-            if (!string.IsNullOrEmpty(_tempFileNameWithPath))
-            {                                
-                _fileStream = new FileStream(GetNewTempFileWithPath(), FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, useAsync: true);
-                _fileStream.Seek(_fileStreamOffset, SeekOrigin.Begin);                
-                return _fileStream;
-            }
+            _fileStream = GetInternalFileStream();
 
-            _fileStream = new FileStream(GetNewTempFileWithPath(), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, BufferSize,useAsync: true);
             return _fileStream;
         }
 
-        public void RenameFileToOriginal()
+        private void RenameFileToOriginal()
         {
             if (_fileStream == null) return;
 
@@ -59,10 +47,10 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
 
             File.Move(GetNewTempFileWithPath(), GetOriginalFileWithPath());
         }
-
+        
         public void SetStreamPosition(long offset)
         {
-            _fileStreamOffset = offset;
+            FileStreamOffset = offset;
         }
 
         public void SetContentLength(long contentLenght)
@@ -73,10 +61,10 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
 
         public string GetNewTempFileWithPath()
         {
-            if (_tempFileNameWithPath == null)
-            _tempFileNameWithPath = Path.GetTempFileName();
-            Debug.WriteLine(_tempFileNameWithPath);
-            return _tempFileNameWithPath;
+            if (TempFileNameWithPath == null)
+            TempFileNameWithPath = Path.GetTempFileName();
+            
+            return TempFileNameWithPath;
         }
 
         private string GetOriginalFileWithPath()
@@ -94,7 +82,7 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
             return _currentBytesRead;
         }
 
-        public void setCurrentBytesRead(long bytes)
+        public void SetCurrentBytesRead(long bytes)
         {
             _currentBytesRead = bytes;
         }
@@ -104,34 +92,19 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
             _currentBytesRead += bytes;
         }
 
+
         public long GetTotalFileSize()
         {
-            return _fileStreamOffset + _contentLenght;
+            return FileStreamOffset + _contentLenght;
         }
 
-
+        protected abstract void OnCleanup();
         public void Dispose()
         {
-            if (_cancelToken != null)
-            {
-                if (_cancelToken.IsCanceld == false)
-                {
-                    if (File.Exists(GetOriginalFileWithPath()))
-                        File.Delete(GetOriginalFileWithPath());
-
-                    File.Move(GetNewTempFileWithPath(), GetOriginalFileWithPath());
-                }
-            }
-            else
-            {
-                if (File.Exists(GetOriginalFileWithPath()))
-                    File.Delete(GetOriginalFileWithPath());
-
-                File.Move(GetNewTempFileWithPath(), GetOriginalFileWithPath());
-            }
-
-
+            OnCleanup();
             _fileStream?.Dispose();
         }
+
+        
     }
 }

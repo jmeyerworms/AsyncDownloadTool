@@ -10,7 +10,6 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
 {
     public class HttpWebDownloadService : IDownloadService
     {
-        private CancellationToken _cancellationToken;
         private CancellationTokenSource _cancellationTokenSource;        
         
         public event EventHandler<MyDownloadEventArgs> DownloadComplete;
@@ -28,34 +27,39 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
 
         public async void ResumeDownload(Model.Download download)
         {
+            download.FileRenameCancelToken = new FileRenameCancelToken();
+            var fileResume = new FileResumeStreamer(download.TempFileName,download.TargetPathWithFileName, download.FileRenameCancelToken);            
+
             await RunDownload(
                 download, 
-                request => request.AddRange(download.GetBytesFromAllParts()));
+                request =>request.AddRange(download.GetBytesFromAllParts()),
+                fileResume);
         }
 
         public void PauseDownload(Model.Download download)
         {
             download.FileRenameCancelToken.Cancel();
-            _cancellationTokenSource.Cancel();            
+            _cancellationTokenSource.Cancel();
         }
 
 
         public async void DownloadFile(Model.Download download)
         {
+            download.FileRenameCancelToken = new FileRenameCancelToken();
+            var fileRenameStreamer = new NewFileRenameStreamer(download.TargetPathWithFileName, download.FileRenameCancelToken);
+            download.TempFileName = fileRenameStreamer.GetNewTempFileWithPath();
+
             await RunDownload(
-                download, 
-                request => download.FileRenameStreamer = new FileRenameStreamer(download.TargetPathWithFileName, download.FileRenameCancelToken),
-                DownloadCancel
-                );
+                download,
+                request => request.AddRange(0),
+                fileRenameStreamer);
         }
 
-        private async Task RunDownload(Model.Download download, Action<HttpWebRequest> configureRequest, EventHandler<MyDownloadEventArgs> downloadCancelPauseHandler)
+        private async Task RunDownload(Model.Download download, Action<HttpWebRequest> configureRequest,FileRenameStreamer fileRenameStreamer)
         {
             try
-            {
-                download.FileRenameCancelToken = new FileRenameCancelToken();
+            {                
                 _cancellationTokenSource = new CancellationTokenSource();
-                _cancellationToken = _cancellationTokenSource.Token;
 
                 var request = (HttpWebRequest) WebRequest.Create(new Uri(download.SourcePath));
 
@@ -63,15 +67,17 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
                 
                 using (var response = await request.GetResponseAsync())
                 {
-                    download.FileRenameStreamer.SetContentLength(response.ContentLength);
+                    fileRenameStreamer.SetContentLength(response.ContentLength);
+                    
                     var data = response.GetResponseStream();
 
-                    using (download.FileRenameStreamer)
+                    using (fileRenameStreamer)
                     {
-                        var byteBuffer = download.FileRenameStreamer.GetByteBuffer();
-                        download.FileRenameStreamer.SetStreamPosition(download.GetBytesFromAllParts());
+                        var byteBuffer = fileRenameStreamer.GetByteBuffer();
+                        fileRenameStreamer.SetStreamPosition(download.GetBytesFromAllParts());
+                        download.TotalFileSize = fileRenameStreamer.GetTotalFileSize();
 
-                        await MakeDownload(download, data, byteBuffer);
+                        await MakeDownload(download, data, byteBuffer, _cancellationTokenSource.Token, fileRenameStreamer);
                     }
                 }
             }
@@ -81,7 +87,13 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
             }
             catch (OperationCanceledException)
             {
-                downloadCancelPauseHandler?.Invoke(this, new MyDownloadEventArgs());
+                if (download.State == CurrentDownloadState.Cancel)
+                    DeleteDownload(download);
+                else if (download.State == CurrentDownloadState.Pause)
+                    DownloadPause?.Invoke(this, new MyDownloadEventArgs());
+                else
+                    DeleteDownload(download);
+
             }
             catch (WebException)
             {
@@ -89,34 +101,44 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
             }
         }
 
-        private async Task MakeDownload(Model.Download download, Stream data, byte[] byteBuffer)
+        private void CompleteDownload(Model.Download download)
         {
-            using (var output = download.FileRenameStreamer.GetFileStream())
+            DownloadComplete?.Invoke(this, new MyDownloadEventArgs());
+            download.FileRenameCancelToken = null;                        
+        }
+        private void DeleteDownload(Model.Download download)
+        {
+            DownloadCancel?.Invoke(this, new MyDownloadEventArgs());
+        }
+
+        private async Task MakeDownload(Model.Download download, Stream data, byte[] byteBuffer, CancellationToken cancellationToken, FileRenameStreamer fileRenameStreamer)
+        {            
+            using (var output = fileRenameStreamer.GetFileStream())
             {
                 var onProgressChanged = new Progress<MyProgress>(OnDownloadProgressChanged);
                 var oldPercentDone = 0.0;
                 var bytesRead = 0;
-
+                
                 download.StartDownloadPart();
                 do
                 {                   
-                    bytesRead = await data.ReadAsync(byteBuffer, 0, byteBuffer.Length, _cancellationToken);
+                    bytesRead = await data.ReadAsync(byteBuffer, 0, byteBuffer.Length, cancellationToken);
 
                     download.AddBytesToPart(bytesRead);
-                    download.FileRenameStreamer.AddCurrentBytesRead(bytesRead);
+                    fileRenameStreamer.AddCurrentBytesRead(bytesRead);
 
                     if (bytesRead <= 0)
                         continue;
 
-                    await output.WriteAsync(byteBuffer, 0, bytesRead, _cancellationToken);
-
+                    await output.WriteAsync(byteBuffer, 0, bytesRead, cancellationToken);
+                    
                     oldPercentDone = SendDownloadProgress(onProgressChanged, download, oldPercentDone);
                 } while (bytesRead > 0);
 
                 download.FinishDownloadPart();
                 download.DumpLogFromAllParts();
 
-                DownloadComplete?.Invoke(this, new MyDownloadEventArgs());
+                CompleteDownload(download);
             }
         }
 
@@ -125,10 +147,8 @@ namespace ÜbungWPFDownloadTool.BusinessLayer.Download
             var myProgress = new MyProgress()
             {
                 CurrentFileSize =  download.GetBytesFromAllParts(),
-                TotalFileSize = download.FileRenameStreamer.GetTotalFileSize()
-            };
-
-            download.TotalFileSize = download.FileRenameStreamer.GetTotalFileSize();
+                TotalFileSize = download.TotalFileSize
+            };            
 
             var percentDone = (double)myProgress.CurrentFileSize / myProgress.TotalFileSize;
 

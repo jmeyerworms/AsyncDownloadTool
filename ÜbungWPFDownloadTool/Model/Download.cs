@@ -19,23 +19,12 @@ namespace ÜbungWPFDownloadTool.Model
 
         public long TotalFileSize { get; set; }
         private readonly List<DownloadParts> _downloadParts = new List<DownloadParts>();
-
         public string TargetPathWithFileName { get; set; }
         public string TargetFileName { get; set; }
-
+        public string TempFileName { get; set; }
         public string TargetPath { get; private set; }
         public string SourcePath { get; private set; }
-
-        public FileRenameStreamer FileRenameStreamer { get; set; }
         public FileRenameCancelToken FileRenameCancelToken { get; set; }
-
-
-        public bool CanBeResumed()
-        {
-            return FileRenameStreamer != null &&
-                   FileRenameCancelToken != null &&
-                   FileRenameCancelToken.IsCanceld;
-        }
 
         public CurrentDownloadState State { get; set; }
 
@@ -90,7 +79,7 @@ namespace ÜbungWPFDownloadTool.Model
         {
             foreach (var part in _downloadParts)
             {
-                Debug.WriteLine("part offset " + part.Offset + "bytes " + part.Bytes + "finished " + part.Finished);
+                Debug.WriteLine("part offset " + part.Offset + "bytes " + part.Bytes + " finished " + part.Finished);
             }
         }
     }

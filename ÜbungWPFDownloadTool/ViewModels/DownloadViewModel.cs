@@ -72,9 +72,7 @@ namespace ÜbungWPFDownloadTool.ViewModels
         {
             CurrentProgress = 1.0;
             Download.State = CurrentDownloadState.Finish;
-            Debug.WriteLine("Download finisch");
-            Download.FileRenameCancelToken = null;
-            Download.FileRenameStreamer = null;
+            Debug.WriteLine("Download finisch");            
 
             DownloadComplete?.Invoke(sender, myDownloadEventArgs);
         }
@@ -98,8 +96,8 @@ namespace ÜbungWPFDownloadTool.ViewModels
 
         public void CancelDownload()
         {
-            _downloadService.CancelDownload(Download);
             Download.State = CurrentDownloadState.Cancel;
+            _downloadService.CancelDownload(Download);            
         }
 
         public void PauseDownload()
