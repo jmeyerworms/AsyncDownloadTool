@@ -4,28 +4,21 @@ namespace WPFDownloadTool.BusinessLayer.Download
 {
     public class FileResumeStreamer : FileRenameStreamer
     {
+        private readonly string _tempfile;        
         public FileResumeStreamer(string tempfile, string targetPathWithFileName, FileRenameCancelToken cancelToken)
             : base(targetPathWithFileName, cancelToken)
         {
-            TempFileNameWithPath = tempfile;
+            _tempfile = tempfile;
         }
 
-        protected override FileStream GetInternalFileStream()
+        protected override void SetFileStreamConfig(FileStream stream)
         {
-            var fileStream = new FileStream(TempFileNameWithPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, useAsync: true);
-            fileStream.Seek(FileStreamOffset, SeekOrigin.Begin);
-            return fileStream;
+            stream.Seek(FileStreamOffset, SeekOrigin.Begin);            
         }
-       
-        protected override void OnCleanup()
-        {
-            if (!_cancelToken.IsCanceld)
-            {
-                if (File.Exists(_targetPathWithFileName))
-                    File.Delete(_targetPathWithFileName);
 
-                File.Move(TempFileNameWithPath, _targetPathWithFileName);
-            }
+        protected override string GetInternalNewTempFileWithPath()
+        {
+            return _tempfile;
         }
     }
 }

@@ -105,8 +105,12 @@ namespace WPFDownloadTool.BusinessLayer.Download
             DownloadComplete?.Invoke(this, new MyDownloadEventArgs());
             download.FileRenameCancelToken = null;                        
         }
+
         private void DeleteDownload(Model.Download download)
         {
+            download.ResetDownloadPart();
+            download.TotalFileSize = 0;  
+            
             DownloadCancel?.Invoke(this, new MyDownloadEventArgs());
         }
 

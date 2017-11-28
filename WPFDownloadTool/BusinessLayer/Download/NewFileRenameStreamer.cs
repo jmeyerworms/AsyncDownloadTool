@@ -9,21 +9,14 @@ namespace WPFDownloadTool.BusinessLayer.Download
         {
         }
 
-        protected override FileStream GetInternalFileStream()
+        protected override string GetInternalNewTempFileWithPath()
         {
-            var fileStream = new FileStream(TempFileNameWithPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, useAsync: true);            
-            return fileStream;
-        }
-        
-        protected override void OnCleanup()
-        {
-            if (!_cancelToken.IsCanceld)
-            {
-                if (File.Exists(_targetPathWithFileName))
-                    File.Delete(_targetPathWithFileName);
+            if (TempFileNameWithPath == null)
+                TempFileNameWithPath = Path.GetTempFileName();
 
-                File.Move(TempFileNameWithPath, _targetPathWithFileName);
-            }
+            return TempFileNameWithPath;
         }
+
+
     }
 }
