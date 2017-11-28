@@ -48,6 +48,11 @@ namespace WPFDownloadTool.Model
             _downloadParts.Add(new DownloadParts(){ Offset = offset });            
         }
 
+        public void ResetDownloadPart()
+        {
+            _downloadParts.Clear();
+        }
+
         public void AddBytesToPart(long bytes)
         {
             if (_downloadParts.Count == 0) return;
