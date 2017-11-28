@@ -58,7 +58,8 @@
             <StackPanel>
 
                 <TextBlock TextAlignment="Center">
-                    <Run Text="{Binding ToTalFilesToDownload}" />
+                    <Run Text="{Binding FilesToDownload}" />
+                    <Run Text="/" /> <Run Text="{Binding TotalFilesToDownload}" />
                     <Run Text="File/s Download/ing at" /> <Run Text="{Binding TotalDownloadSpeed}" />
                 </TextBlock>
                 <ProgressBar

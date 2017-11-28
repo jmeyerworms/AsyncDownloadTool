@@ -30,7 +30,9 @@ namespace WPFDownloadTool.ViewModels
             if (download == null) return;
             
             this.Download = download;
-            download.State = CurrentDownloadState.Stop;            
+            download.State = CurrentDownloadState.Stop;
+            PauseIcon = FontAwesomeIcon.Ban;
+
             this.DownloadName = download.TargetFileName;
             this._downloadService = downloadService;
             DownloadTracker = new DownloadProgressTracker(50, TimeSpan.FromMilliseconds(500));
@@ -67,8 +69,7 @@ namespace WPFDownloadTool.ViewModels
         }
 
         private void DownloadServiceOnDownloadCancel(object sender, MyDownloadEventArgs myDownloadEventArgs)
-        {
-            DownloadTracker.NewFile();
+        {            
             Download.State = CurrentDownloadState.Cancel;
             Debug.WriteLine("Download cancel");
 
@@ -79,14 +80,19 @@ namespace WPFDownloadTool.ViewModels
 
         public void DownloadFile()
         {
+            DownloadTracker.NewFile();
+            DownloadTracker.SetProgress(0, 0);
+
+            PauseIcon = FontAwesomeIcon.Pause;
             Download.State = CurrentDownloadState.Download;
             _downloadService.DownloadFile(Download);
         }
 
         public void CancelDownload()
         {
+            PauseIcon = FontAwesomeIcon.Ban;
             Download.State = CurrentDownloadState.Cancel;
-            _downloadService.CancelDownload(Download);            
+            _downloadService.CancelDownload(Download);              
         }
 
         public void PauseDownload()
@@ -97,14 +103,20 @@ namespace WPFDownloadTool.ViewModels
                 return;
             }
 
-            PauseIcon = FontAwesomeIcon.Play;
-            Download.State = CurrentDownloadState.Pause;
+            if (Download.State == CurrentDownloadState.Download)
+            {
+                PauseIcon = FontAwesomeIcon.Play;
+                Download.State = CurrentDownloadState.Pause;
 
-            _downloadService.PauseDownload(Download);                         
+                _downloadService.PauseDownload(Download);
+            }
+
         }
 
         private void ResumeDownload()
         {
+            if (Download.State != CurrentDownloadState.Pause) return;
+
             PauseIcon = FontAwesomeIcon.Pause;
             Download.State = CurrentDownloadState.Download;
 

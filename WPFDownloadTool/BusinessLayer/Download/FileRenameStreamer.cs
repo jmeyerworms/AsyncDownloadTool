@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing.Text;
 using System.IO;
 
 namespace WPFDownloadTool.BusinessLayer.Download
@@ -6,16 +7,15 @@ namespace WPFDownloadTool.BusinessLayer.Download
     public abstract class FileRenameStreamer : IDisposable
     {
         protected string TempFileNameWithPath;
-        protected readonly string _targetPathWithFileName;
         protected long FileStreamOffset = 0;
-        protected int BufferSize = 64 * 1024;
-        protected readonly FileRenameCancelToken _cancelToken;
 
-
-        private FileStream _fileStream;                
-        private readonly byte[] _byteBuffer;        
+        private readonly FileRenameCancelToken _cancelToken;        
+        private readonly string _targetPathWithFileName;        
+        private int BufferSize = 64 * 1024;
+        private FileStream _fileStream;         
+        private readonly byte[] _byteBuffer;  
         private long _contentLenght;
-        private long _currentBytesRead;
+        private long _currentBytesRead;        
 
         public FileRenameStreamer(string targetPathWithFileName, FileRenameCancelToken cancelToken)
         {
@@ -24,10 +24,14 @@ namespace WPFDownloadTool.BusinessLayer.Download
             _byteBuffer = new byte[BufferSize];
         }
 
-        protected abstract FileStream GetInternalFileStream();
+        protected virtual void SetFileStreamConfig(FileStream stream)
+        {
+        }
+
         public FileStream GetFileStream()
         {
-            _fileStream = GetInternalFileStream();
+            _fileStream = new FileStream(GetNewTempFileWithPath(), FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, useAsync: true);
+            SetFileStreamConfig(_fileStream);
 
             return _fileStream;
         }
@@ -51,7 +55,6 @@ namespace WPFDownloadTool.BusinessLayer.Download
         {
             _contentLenght = contentLenght;
         }
-
 
         protected abstract string GetInternalNewTempFileWithPath();
         public string GetNewTempFileWithPath()
@@ -89,11 +92,17 @@ namespace WPFDownloadTool.BusinessLayer.Download
         {
             return FileStreamOffset + _contentLenght;
         }
-
-        protected abstract void OnCleanup();
+        
         public void Dispose()
         {
-            OnCleanup();
+            if (!_cancelToken.IsCanceld)
+            {
+                if (File.Exists(_targetPathWithFileName))
+                    File.Delete(_targetPathWithFileName);
+
+                File.Move(GetNewTempFileWithPath(), _targetPathWithFileName);
+            }
+
             _fileStream?.Dispose();
         }
 
